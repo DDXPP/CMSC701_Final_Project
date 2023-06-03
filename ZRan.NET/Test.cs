@@ -5,7 +5,7 @@ using ParallelParsing.ZRan.NET;
 using Index = ParallelParsing.ZRan.NET.Index;
 using System.IO.Compression;
 using static ParallelParsing.ZRan.NET.Constants;
-using static ParallelParsing.ZRan.NET.Compat;
+// using static ParallelParsing.ZRan.NET.Compat;
 using SDebug = System.Diagnostics.Debug;
 
 
