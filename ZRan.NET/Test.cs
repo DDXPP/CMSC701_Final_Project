@@ -7,7 +7,8 @@ using System.IO.Compression;
 using static ParallelParsing.ZRan.NET.Constants;
 // using static ParallelParsing.ZRan.NET.Compat;
 using SDebug = System.Diagnostics.Debug;
-using Free.Ports.zLib;
+using static Zlib.Extended.Inflate;
+using static Zlib.Extended.Zlib;
 
 
 //Bug: when there are more than 93 points in index, it will stop running
@@ -240,11 +241,11 @@ int xx = 0;
 
 ZResult ret;
 uint have;
-zlib.z_stream strm = new();
+z_stream strm = new();
 byte[] input = new byte[CHUNK];
 byte[] output = new byte[CHUNK];
 
-ret = (ZResult)zlib.inflateInit2(strm, 47);
+ret = (ZResult)inflateInit2(strm, 47);
 SDebug.Assert(ret == ZResult.OK);
 
 do
@@ -259,7 +260,7 @@ do
 		strm.avail_out = CHUNK;
 		strm.out_buf = output;
 
-		ret = (ZResult)zlib.inflate(strm, (int)ZFlush.NO_FLUSH);
+		ret = (ZResult)inflate(strm, (int)ZFlush.NO_FLUSH);
 		SDebug.Assert(ret != ZResult.DATA_ERROR);
 		SDebug.Assert(ret != ZResult.STREAM_ERROR);
 
@@ -270,7 +271,7 @@ do
 
 } while (ret != ZResult.STREAM_END);
 
-ret = (ZResult)zlib.inflateEnd(strm);
+ret = (ZResult)inflateEnd(strm);
 
 // var str = Encoding.ASCII.GetString(ms.GetBuffer());
 // Console.WriteLine(str);

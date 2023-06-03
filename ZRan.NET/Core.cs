@@ -1,11 +1,12 @@
 
 using static ParallelParsing.ZRan.NET.Constants;
 // using static ParallelParsing.ZRan.NET.Compat;
-using static Free.Ports.zLib.zlib;
+using static Zlib.Extended.Inflate;
 using System.IO.Compression;
 using System.Text;
 using System.Runtime.InteropServices;
-using Free.Ports.zLib;
+using static Zlib.Extended.Zlib;
+using Zlib.Extended.Enumerations;
 
 namespace ParallelParsing.ZRan.NET;
 
@@ -74,7 +75,7 @@ public static class Core
 					totout += strm.avail_out;
 
 					// return at end of block
-					ret = (ZResult)inflate(strm, Z_BLOCK);
+					ret = (ZResult)inflate(strm, FlushValue.Z_BLOCK);
 
 					totin -= strm.avail_in;
 					totout -= strm.avail_out;
@@ -116,12 +117,12 @@ public static class Core
 					// entry point after the zlib or gzip header, and assures that the
 					// index always has at least one access point; we avoid creating an
 					// access point after the last block by checking bit 6 of data_type
-					if ((((zlib.inflate_state)strm.state).mode == zlib.inflate_mode.TYPE) && ((zlib.inflate_state)strm.state).last == 0)
+					if ((((inflate_state)strm.state).mode == inflate_mode.TYPE) && ((inflate_state)strm.state).last == 0)
 					{
 						// Add the first point after the header
 						if (totout == 0) 
 						{
-							index.AddPoint_NEW((int)((zlib.inflate_state)strm.state).bits, totin, totout, strm.avail_out, window, null);
+							index.AddPoint_NEW((int)((inflate_state)strm.state).bits, totin, totout, strm.avail_out, window, null);
 							// last = totout;
 						}
 						else
@@ -131,7 +132,7 @@ public static class Core
 								// Array.Resize(ref offsetBeforePoint, offsetArraySize + 1);
 								// offsetBeforePoint.PrintASCII(offsetBeforePoint.Length);
 
-								index.AddPoint_NEW((int)((zlib.inflate_state)strm.state).bits, totin, totout, strm.avail_out, window, offsetBeforePoint[0..offsetArraySize]);
+								index.AddPoint_NEW((int)((inflate_state)strm.state).bits, totin, totout, strm.avail_out, window, offsetBeforePoint[0..offsetArraySize]);
 								// Console.WriteLine(index.List.Count());
 								
 								// Array.Resize(ref offsetBeforePoint, (int)WINSIZE);
@@ -150,7 +151,7 @@ public static class Core
 							continue;
 						}
 
-						index.AddPoint_NEW((int)((zlib.inflate_state)strm.state).bits, totin, totout, strm.avail_out, window, null);
+						index.AddPoint_NEW((int)((inflate_state)strm.state).bits, totin, totout, strm.avail_out, window, null);
 
 						break;
 					}

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\zlib.net\zLib.csproj" />
+    <ProjectReference Include="../Zlib.Extended/Zlib.Extended.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
