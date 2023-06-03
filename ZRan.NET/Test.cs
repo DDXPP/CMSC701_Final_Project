@@ -17,16 +17,16 @@ using Zlib.Extended.Enumerations;
 var testFile = "../Gzipped_FASTQ_Files/SRR11192680_original.fastq.gz";
 // var testFile = "../Benchmark/Samples/12288000.gz";
 var fs = File.OpenRead(testFile);
-// var index = Core.BuildDeflateIndex_NEW(fs, span: 32768, 200); //1048576L
+var index = Core.BuildDeflateIndex_NEW(fs, span: 32768, 2400); //1048576L
 // var index = Core.BuildDeflateIndex_OLD(fs, span: 32768); //1048576L
 // var index = Core.BuildDeflateIndex(fs, chunksize: 1200);
 // i.Serialize("../Gzipped_FASTQ_Files/test1.fastq.gzi");
 
-Console.WriteLine(Core.BuildDeflateIndex_NEW(fs, span: 32768, 20000).List.Count());
+// Console.WriteLine(Core.BuildDeflateIndex_NEW(fs, span: 32768, 20000).List.Count());
 // chunsize 30,000 works for 12288000.gz
 
 //-----------------------------------------------------------------------------------------------------------
-int x = 37;
+// int x = 37;
 
 // fs.Position = 0;
 // var from = index.List[x];
@@ -48,27 +48,27 @@ int x = 37;
 // var outBuf = new byte[len_out]; // change size *****************************************
 // Core.ExtractDeflateIndex(fileBuffer, from, to, outBuf);
 //-----------------------------------------------------------------------------------------------------------
-// for (int x = 0; x < index.List.Count - 1; x++)
-// {
-// 	var len_in = index.List[x + 1].Input - index.List[x].Input + 1;
-// 	var from = index.List[x];
-// 	var to = index.List[x + 1];
-// 	var len_out = (int)(to.Output - from.Output);
-// 	var fileBuffer = new byte[len_in];
-// 	fs.Position = from.Input - 1;
-// 	fs.ReadExactly(fileBuffer, 0, (int)len_in);
-// 	var outBuf = new byte[len_out]; // change size *****************************************
-// 	Core.ExtractDeflateIndex(fileBuffer, from, to, outBuf);
-// 	// Core.ExtractDeflateIndex_OLD(fs, index, from.Output, outBuf, len_out);
-//     // outBuf.PrintASCIIFirstAndLast(1500);
+for (int x = 0; x < index.List.Count - 1; x++)
+{
+	var len_in = index.List[x + 1].Input - index.List[x].Input + 1;
+	var from = index.List[x];
+	var to = index.List[x + 1];
+	var len_out = (int)(to.Output - from.Output);
+	var fileBuffer = new byte[len_in];
+	fs.Position = from.Input - 1;
+	fs.ReadExactly(fileBuffer, 0, (int)len_in);
+	var outBuf = new byte[len_out]; // change size *****************************************
+	Core.ExtractDeflateIndex(fileBuffer, from, to, outBuf);
+	// Core.ExtractDeflateIndex_OLD(fs, index, from.Output, outBuf, len_out);
+    // outBuf.PrintASCIIFirstAndLast(1500);
 
 
-//     // index.List[x].offset.PrintASCII(index.List[x].offset.Length);
-//     // Console.WriteLine("--------------------");
-//     // outBuf.PrintASCII(1000);
-//     // Console.WriteLine("||||||||||||||||||||");
-// 	Console.WriteLine(x);
-// }
+    // index.List[x].offset.PrintASCII(index.List[x].offset.Length);
+    // Console.WriteLine("--------------------");
+    // outBuf.PrintASCII(1000);
+    // Console.WriteLine("||||||||||||||||||||");
+	Console.WriteLine(x);
+}
 
 
 //-----------------------------------------------------------------------------------------------------------

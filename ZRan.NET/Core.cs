@@ -76,6 +76,7 @@ public static class Core
 					// update the total input and output counters
 					totin += strm.avail_in;
 					totout += strm.avail_out;
+					var prevOut = strm.avail_out;
 
 					strm.next_out = 0;
 					strm.avail_out = WINSIZE;
@@ -212,13 +213,14 @@ public static class Core
 			inflatePrime(strm, from.Bits, value >> (8 - from.Bits));
 			posInFile++;
 		}
-		inflateSetDictionary(strm, from.Window, WINSIZE);
 
 		strm.avail_in = 0;
 		strm.avail_out = (uint)len;
 
 		strm.out_buf = buf;
 		strm.next_out = 0;
+
+		inflateSetDictionary(strm, from.Window, WINSIZE);
 		do
 		{
 			if (strm.avail_in == 0)

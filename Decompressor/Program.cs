@@ -29,7 +29,7 @@ public class Program
         // As = 37990794
 
         var fs = File.OpenRead(gzipPath);
-        var index = Core.BuildDeflateIndex_NEW(fs, 32768, 2400);
+        var index = Core.BuildDeflateIndex_NEW(fs, 32768, 1200);
         fs.Dispose();
 
         // fs = File.OpenRead(gzipPath);
@@ -51,8 +51,8 @@ public class Program
 
         using var records = new BatchedFASTQ(index, gzipPath, enableSsdOptimization: false);
         sw.Start();
-        var count = records.Aggregate(0, (a, x) => a + x.Sequence.Count(c => c == 'A'));
-        // var count = records.Count();
+        // var count = records.Aggregate(0, (a, x) => a + x.Sequence.Count(c => c == 'A'));
+        var count = records.Count();
         sw.Stop();
         Console.WriteLine(count);
         Console.WriteLine("Ellapsed: " + sw.ElapsedMilliseconds);
