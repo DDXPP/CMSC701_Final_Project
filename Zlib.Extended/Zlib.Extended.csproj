@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>1.2.0</Version>
+    <Description>zlib port for .NET with support for an extended LZ77 window size.</Description>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/celophi/zlib.extended</PackageProjectUrl>
+    <PackageTags>zlib;net6;port;inflate;deflate;compression</PackageTags>
+    <PackageLicenseFile>License.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\License.txt" Pack="true" PackagePath="" />
+    <None Include="..\README.md" />
+    <None Update="..\README.md" Pack="True" PackagePath="\" />
+  </ItemGroup>
+</Project>

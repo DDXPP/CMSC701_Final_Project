@@ -140,7 +140,6 @@ public static class Core
 						}
 					}
 
-
 					if (ret == ZResult.STREAM_END)
 					{
 						if (strm.avail_in != 0 || file.Position != file.Length)
