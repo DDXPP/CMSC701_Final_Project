@@ -70,11 +70,11 @@ static object o = new object();
 					(var from, var to, var inBuf) = entry;
 					// var buf = BufferPool.Rent(_Index.ChunkMaxBytes);
 					var buf = new byte[8_000_000];
-					lock (o)
-					{
+					// lock (o)
+					// {
 					Core.ExtractDeflateIndex(inBuf, from, to, buf);
-					}
-					lock (o) {
+					// }
+					// lock (o) {
 					// } 
 					// lock (o) 
 					// {
@@ -86,7 +86,7 @@ static object o = new object();
 					// Array.Clear(inBuf);
 					// BufferPool.Return(buf);
 					// BufferPool.Return(inBuf);
-					}
+					// }
 					foreach (var r in rs) RecordCache.Enqueue(r);
 				});
 				_Tasks.Add(populateCache);

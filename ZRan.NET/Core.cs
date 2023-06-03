@@ -516,7 +516,7 @@ public static class Core
 								// offsetBeforePoint.PrintASCII(offsetBeforePoint.Length);
 
 								index.AddPoint_NEW(strm.DataType & 7, totin, totout, strm.AvailOut, window, offsetBeforePoint[0..offsetArraySize]);
-								Console.WriteLine(index.List.Count());
+								// Console.WriteLine(index.List.Count());
 								
 								// Array.Resize(ref offsetBeforePoint, (int)WINSIZE);
 								recordCounter = 0;
@@ -830,9 +830,10 @@ public static class Core
 	}
 
 static object o = new object();
-	public static int ExtractDeflateIndex(
+	public static unsafe int ExtractDeflateIndex(
 		byte[] fileBuffer, Point from, Point to, byte[] buf)
 	{
+		// GC.Collect();
 		// lock (o) {
 		// no need to pin (I guess); it's an unmanaged struct on stack
 		using var strm = new ZStream();
@@ -861,6 +862,7 @@ static object o = new object();
 
 		strm.AvailIn = 0;
 		strm.AvailOut = (uint)len;
+
 		strm.NextOut = buf;
 		do
 		{
@@ -877,6 +879,11 @@ static object o = new object();
 			// normal inflate
 			if (ret == ZResult.MEM_ERROR || ret == ZResult.DATA_ERROR || ret == ZResult.NEED_DICT)
 				throw new ZException(ret);
+			if (ret == ZResult.STREAM_ERROR)
+			{
+				Console.WriteLine("stream error");
+				break;
+			}
 			if (ret == ZResult.STREAM_END) break;
 
 			// continue to process the available input before reading more
