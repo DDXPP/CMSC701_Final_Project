@@ -58,6 +58,7 @@ public static class Core
 					throw new ZException(ZResult.DATA_ERROR);
 				}
 				strm.in_buf = input;
+				strm.next_in = 0;
 
 				// process all of that, or until end of stream
 				do
@@ -67,12 +68,17 @@ public static class Core
 					{
 						strm.avail_out = WINSIZE;
 						strm.out_buf = window;
+						Array.Clear(strm.out_buf);
+						strm.next_out = 0;
 					}
 
 					// inflate until out of input, output, or at end of block --
 					// update the total input and output counters
 					totin += strm.avail_in;
 					totout += strm.avail_out;
+
+					strm.next_out = 0;
+					strm.avail_out = WINSIZE;
 
 					// return at end of block
 					ret = (ZResult)inflate(strm, FlushValue.Z_BLOCK);
@@ -212,6 +218,7 @@ public static class Core
 		strm.avail_out = (uint)len;
 
 		strm.out_buf = buf;
+		strm.next_out = 0;
 		do
 		{
 			if (strm.avail_in == 0)
@@ -221,6 +228,7 @@ public static class Core
 				posInFile += value;
 				if (value == 0) throw new ZException(ZResult.DATA_ERROR);
 				strm.in_buf = input;
+				strm.next_in = 0;
 			}
 			ret = (ZResult)inflate(strm, (int)ZFlush.NO_FLUSH);
 			// strm.NextOut.PrintASCII(32*1024-1);

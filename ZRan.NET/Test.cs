@@ -9,19 +9,20 @@ using static ParallelParsing.ZRan.NET.Constants;
 using SDebug = System.Diagnostics.Debug;
 using static Zlib.Extended.Inflate;
 using static Zlib.Extended.Zlib;
+using Zlib.Extended.Enumerations;
 
 
 //Bug: when there are more than 93 points in index, it will stop running
 
-// var testFile = "../Gzipped_FASTQ_Files/SRR11192680_original.fastq.gz";
-var testFile = "../Benchmark/Samples/12288000.gz";
+var testFile = "../Gzipped_FASTQ_Files/SRR11192680_original.fastq.gz";
+// var testFile = "../Benchmark/Samples/12288000.gz";
 var fs = File.OpenRead(testFile);
 // var index = Core.BuildDeflateIndex_NEW(fs, span: 32768, 200); //1048576L
 // var index = Core.BuildDeflateIndex_OLD(fs, span: 32768); //1048576L
 // var index = Core.BuildDeflateIndex(fs, chunksize: 1200);
 // i.Serialize("../Gzipped_FASTQ_Files/test1.fastq.gzi");
 
-// Console.WriteLine(Core.BuildDeflateIndex_NEW(fs, span: 32768, 20000).List.Count());
+Console.WriteLine(Core.BuildDeflateIndex_NEW(fs, span: 32768, 20000).List.Count());
 // chunsize 30,000 works for 12288000.gz
 
 //-----------------------------------------------------------------------------------------------------------
@@ -239,39 +240,41 @@ int xx = 0;
 // using var fs = File.OpenRead(testFile);
 // using var ms = new MemoryStream();
 
-ZResult ret;
-uint have;
-z_stream strm = new();
-byte[] input = new byte[CHUNK];
-byte[] output = new byte[CHUNK];
+// ZResult ret;
+// uint have;
+// z_stream strm = new();
+// byte[] input = new byte[CHUNK];
+// byte[] output = new byte[CHUNK];
 
-ret = (ZResult)inflateInit2(strm, 47);
-SDebug.Assert(ret == ZResult.OK);
+// ret = (ZResult)inflateInit2(strm, 47);
+// SDebug.Assert(ret == ZResult.OK);
 
-do
-{
-	strm.avail_in = (uint)fs.Read(input, 0, (int)CHUNK);
+// do
+// {
+// 	strm.avail_in = (uint)fs.Read(input, 0, (int)CHUNK);
 
-	if (strm.avail_in == 0) break;
-	strm.in_buf = input;
+// 	if (strm.avail_in == 0) break;
+// 	strm.in_buf = input;
+// 	strm.next_in = 0;
 
-	do
-	{
-		strm.avail_out = CHUNK;
-		strm.out_buf = output;
+// 	do
+// 	{
+// 		strm.avail_out = CHUNK;
+// 		strm.out_buf = output;
+// 		strm.next_out = 0;
 
-		ret = (ZResult)inflate(strm, (int)ZFlush.NO_FLUSH);
-		SDebug.Assert(ret != ZResult.DATA_ERROR);
-		SDebug.Assert(ret != ZResult.STREAM_ERROR);
+// 		ret = (ZResult)inflate(strm, FlushValue.Z_NO_FLUSH);
+// 		SDebug.Assert(ret != ZResult.DATA_ERROR);
+// 		SDebug.Assert(ret != ZResult.STREAM_ERROR);
 
-		have = CHUNK - strm.avail_out;
-		// ms.Write(output, 0, (int)CHUNK);
+// 		have = CHUNK - strm.avail_out;
+// 		ms.Write(output, 0, (int)CHUNK);
 
-	} while (strm.avail_out == 0);
+// 	} while (strm.avail_out == 0);
 
-} while (ret != ZResult.STREAM_END);
+// } while (ret != ZResult.STREAM_END);
 
-ret = (ZResult)inflateEnd(strm);
+// ret = (ZResult)inflateEnd(strm);
 
 // var str = Encoding.ASCII.GetString(ms.GetBuffer());
 // Console.WriteLine(str);
