@@ -17,7 +17,7 @@ using Zlib.Extended.Enumerations;
 var testFile = "../Gzipped_FASTQ_Files/SRR11192680_original.fastq.gz";
 // var testFile = "../Benchmark/Samples/12288000.gz";
 var fs = File.OpenRead(testFile);
-var index = Core.BuildDeflateIndex_NEW(fs, span: 32768, 2400); //1048576L
+var index = Core.BuildDeflateIndex_NEW(fs, span: 32768, 6000); //1048576L
 // var index = Core.BuildDeflateIndex_OLD(fs, span: 32768); //1048576L
 // var index = Core.BuildDeflateIndex(fs, chunksize: 1200);
 // i.Serialize("../Gzipped_FASTQ_Files/test1.fastq.gzi");

@@ -78,16 +78,16 @@ static object o = new object();
 					// } 
 					// lock (o) 
 					// {
-					int counter = 0;
-					for (int i = from.Window?.Length - 1 ?? -1; i >= 0 && from.Window[i] != '@'; i--)
-					{
-						counter++;
-					}
-					if (counter == from.Window?.Length) counter = 0;
-					var combined = counter == 0 ? 
-								   new CombinedMemory(Array.Empty<byte>(), buf) : 
-								   new CombinedMemory(from.Window[^(counter + 1)..^0], buf);
-					rs = Parsing.Parse(combined);
+					// int counter = 0;
+					// for (int i = from.Window?.Length - 1 ?? -1; i >= 0 && from.Window[i] != '@'; i--)
+					// {
+					// 	counter++;
+					// }
+					// if (counter == from.Window?.Length) counter = 0;
+					// var combined = counter == 0 ? 
+					// 			   new CombinedMemory(Array.Empty<byte>(), buf) : 
+					// 			   new CombinedMemory(from.Window[^(counter + 1)..^0], buf);
+					rs = Parsing.Parse(new CombinedMemory(from.offset, buf));
 					// counter++;
 					// Console.WriteLine(FastqRecord.counter);
 					// if (rs.Count != 10000) Console.WriteLine(rs.Count);
