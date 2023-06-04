@@ -18,11 +18,11 @@ public sealed class LazyFileReader : IDisposable
 	public readonly ConcurrentQueue<(Point from, Point to, Memory<byte> segment, IMemoryOwner<byte>)> PartitionQueue;
 	private Index _Index;
 	// private IEnumerator<Point> _IndexEnumerator;
-	private FileStream[] _FileReads;
+	private FileRead[] _FileReads;
 	private ArrayPool<byte> _BufferPool;
-	private bool _IsEOF = false;
-	private int _CurrPoint = 0;
-	// private bool _CanGetNewPartition = true;
+	private bool _IsEOF => _NumFinished == _FileReads.Length;
+	// private int _CurrPoint = 0;
+	private int _NumFinished = 0;
 
 	public LazyFileReader(Index index, string path, ArrayPool<byte> pool, bool enableSsdOptimization)
 	{
@@ -32,22 +32,26 @@ public sealed class LazyFileReader : IDisposable
 		// _IndexEnumerator = _Index.List.GetEnumerator();
 
 		_FileReads = enableSsdOptimization ?
-					   new FileStream[FILE_THREADS_COUNT_SSD] :
-					   new FileStream[FILE_THREADS_COUNT_HDD];
+					   new FileRead[FILE_THREADS_COUNT_SSD] :
+					   new FileRead[FILE_THREADS_COUNT_HDD];
 		for (int i = 0; i < _FileReads.Length; i++)
 		{
-			_FileReads[i] = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+			_FileReads[i] = new FileRead(
+				File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read),
+				index.Count / _FileReads.Length * i,
+				index.Count / _FileReads.Length * (i + 1)
+			);
 		}
 	}
 
 	public void Dispose()
 	{
-		Parallel.ForEach(_FileReads, f => f.Dispose());
+		Parallel.ForEach(_FileReads, f => f.FileStream.Dispose());
 	}
 
 	private void TryReadMore()
 	{
-		Parallel.ForEach(_FileReads, fs => {
+		Parallel.ForEach(_FileReads, read => {
 			if (_IsEOF) return;
 
 			Point from;
@@ -55,25 +59,22 @@ public sealed class LazyFileReader : IDisposable
 			Memory<byte> buf;
 			IMemoryOwner<byte> bufOwner;
 			int len;
-			lock (this)
+			from = _Index[read.CurrI];
+
+			read.CurrI++;
+			if (read.CurrI < read.EndI) to = _Index[read.CurrI];
+			else
 			{
-				from = _Index[_CurrPoint];
-
-				_CurrPoint++;
-				if (_CurrPoint < _Index.Count) to = _Index[_CurrPoint];
-				else
-				{
-					_IsEOF = true;
-					return;
-				}
-
-				len = (int)(to.Input - from.Input + 1);
+				_NumFinished++;
+				return;
 			}
+
+			len = (int)(to.Input - from.Input + 1);
 			bufOwner = MemoryPool<byte>.Shared.Rent(len);
 			buf = bufOwner.Memory.Slice(0, len);
 			
-			fs.Position = from.Input - 1;
-			fs.Read(buf.Span);
+			read.FileStream.Position = from.Input - 1;
+			read.FileStream.Read(buf.Span);
 			PartitionQueue.Enqueue((from, to, buf, bufOwner));
 		});
 	}
@@ -101,5 +102,18 @@ public sealed class LazyFileReader : IDisposable
 			return PartitionQueue.TryDequeue(out entry);
 			// int prevCount = PartitionQueue.Count;
 		}
+	}
+
+	private class FileRead
+	{
+		public FileRead(FileStream fs, int curr, int end)
+		{
+			FileStream = fs;
+			CurrI = curr;
+			EndI = end;
+		}
+		public FileStream FileStream;
+		public int CurrI;
+		public int EndI;
 	}
 }
