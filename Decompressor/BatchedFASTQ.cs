@@ -35,12 +35,12 @@ public sealed class BatchedFASTQ : IEnumerable<FastqRecord>, IDisposable
 		public Enumerator(Index index, string gzipPath, bool enableSsdOptimization)
 		{
 			BufferPool = ArrayPool<byte>.Create(index.ChunkMaxBytes, 1024);
-			_Reader = new LazyFileReader(index, gzipPath, BufferPool, enableSsdOptimization);
+			_Tasks = new(index.Count / 2);
+			_Reader = new LazyFileReader(index, gzipPath, BufferPool, _Tasks, enableSsdOptimization);
 			RecordCache = new();
 			_Index = index;
-			_Reader = new(index, gzipPath, BufferPool, enableSsdOptimization);
+			// _Reader = new(index, gzipPath, BufferPool, _Tasks, enableSsdOptimization);
 			_Current = default;
-			_Tasks = new(index.Count / 2);
 		}
 		public const int RECORD_CACHE_MAX_LENGTH = 40000;
 		public ArrayPool<byte> BufferPool;
@@ -65,7 +65,8 @@ public sealed class BatchedFASTQ : IEnumerable<FastqRecord>, IDisposable
 			if (RecordCache.Count <= RECORD_CACHE_MAX_LENGTH &&
 				_Reader.TryGetNewPartition(out var entry))
 			{
-				var populateCache = Task.Run(() => {
+				// var populateCache = Task.Run(() => {
+					// semaphore.Wait();
 					IEnumerable<FastqRecord> rs;
 					(var from, var to, var inBuf, var owner) = entry;
 					var buf = BufferPool.Rent((int)(to.Output - from.Output));
@@ -76,8 +77,9 @@ public sealed class BatchedFASTQ : IEnumerable<FastqRecord>, IDisposable
 					inBuf.Span.Clear();
 					owner.Dispose();
 					BufferPool.Return(buf);
-				}).ContinueWith(t => _Tasks.Remove(t));
-				_Tasks.Add(populateCache);
+					// semaphore.Release();
+				// }).ContinueWith(t => _Tasks.Remove(t));
+				// _Tasks.Add(populateCache);
 			}
 
 			if (RecordCache.TryDequeue(out var res))
