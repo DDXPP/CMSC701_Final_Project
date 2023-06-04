@@ -53,7 +53,7 @@ public class Program
         // }
         // Console.WriteLine(count);
 
-        using var records = new BatchedFASTQ(index, gzipPath, enableSsdOptimization: false);
+        using var records = new BatchedFASTQ(index, gzipPath, enableSsdOptimization: true);
         sw.Start();
         // var count = records.Aggregate(0, (a, x) => a + x.Sequence.Count(c => c == 'A'));
         var count = records.Count();

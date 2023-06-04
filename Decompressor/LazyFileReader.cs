@@ -62,7 +62,7 @@ public sealed class LazyFileReader : IDisposable
 			from = _Index[read.CurrI];
 
 			read.CurrI++;
-			if (read.CurrI < read.EndI) to = _Index[read.CurrI];
+			if (read.CurrI <= read.EndI) to = _Index[read.CurrI];
 			else
 			{
 				_NumFinished++;
