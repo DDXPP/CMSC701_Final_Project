@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.IO;
-using System.IO.Compression;
-using System.Text;
-using System.Linq;
-using System.Buffers;
-using System.Diagnostics;
-using Debug = ParallelParsing.ZRan.NET.Debug;
+﻿using System.Diagnostics;
 using ParallelParsing.ZRan.NET;
 
 // test file downloaded from
@@ -20,7 +12,7 @@ public class Program
     static void Main(string[] args)
     {
         // var gzipPath = "./../Gzipped_FASTQ_Files/SRR11192680_original.fastq.gz";
-        var gzipPath = "./../Benchmark/Samples/768000.gz";
+        var gzipPath = "./../Benchmark/Samples/24576000.gz";
         // var gzipPath575 = "./../Gzipped_FASTQ_Files/SRR24554569_575.fastq";
         // var indexPath575 = "./../Gzipped_FASTQ_Files/SRR24554569_575.fastq.i";
         // var gzipPath32 = "./../Gzipped_FASTQ_Files/SRR24496856_32.fastq";
@@ -29,12 +21,13 @@ public class Program
         // As = 37990794
 
         var sw = new Stopwatch();
-        var fs = File.OpenRead(gzipPath);
-        // sw.Start();
-        var index = Core.BuildDeflateIndex(fs, 24000);
+        // var fs = File.OpenRead(gzipPath);
+        // // sw.Start();
+        // var index = Core.BuildDeflateIndex(fs, 10000);
+        // index.Serialize("../Benchmark/Samples/3072000.gzi");
         // sw.Stop();
         // Console.WriteLine("build index elapsed: " + sw.ElapsedMilliseconds);
-        fs.Dispose();
+        // fs.Dispose();
 
         // fs = File.OpenRead(gzipPath);
         // var fastq = new BatchedFASTQ(index, gzipPath, false);
@@ -51,27 +44,19 @@ public class Program
         //     count += (int)index.ChunkSize;
         // }
         // Console.WriteLine(count);
-
-        using var records = new BatchedFASTQ(index, gzipPath, enableSsdOptimization: true);
+// Console.WriteLine("here");
+        var index = IndexIO.Deserialize("../Benchmark/Samples/24576000.gzi");
+        using var records = new BatchedFASTQ(index, gzipPath, enableSsdOptimization: false);
         sw.Start();
         // var count = records.Aggregate(0, (a, x) => a + x.Sequence.Count(c => c == 'A'));
         var count = records.Count();
+        // foreach (var r in records)
+        // {
+        //     Console.WriteLine(r);
+        // }
         sw.Stop();
         Console.WriteLine(count);
         Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds);
-
-        // var bytes = File.ReadAllBytes(gzipPath32);
-        // sw.Start();
-        // var res = FASTQRecord.Parse(bytes);
-        // sw.Stop();
-        // var count = 0;
-        // // foreach (var r in res)
-        // // {
-        // //     count++;
-        // // }
-        // Console.WriteLine(res.Count());
-        // // Console.WriteLine(res.Aggregate(0, (a, x) => { Thread.Sleep(1); return a + x.Sequence.Count(c => c == 'A'); }));
-        // Console.WriteLine(sw.ElapsedMilliseconds);
     }
 }
 
