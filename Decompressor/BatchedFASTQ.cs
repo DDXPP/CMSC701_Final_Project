@@ -2,8 +2,8 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Concurrent;
 using ParallelParsing.Common;
-using ParallelParsing.ZRan.NET;
-using Index = ParallelParsing.ZRan.NET.Index;
+using ParallelParsing.Interop;
+using Index = ParallelParsing.Common.Index;
 
 namespace ParallelParsing;
 

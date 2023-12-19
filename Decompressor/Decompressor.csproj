@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="../ZRan.NET/ZRan.NET.csproj" />
+    <ProjectReference Include="../Interop/Interop.csproj" />
     <ProjectReference Include="../Common/Common.csproj" />
   </ItemGroup>
 

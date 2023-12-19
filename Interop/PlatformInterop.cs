@@ -1,13 +1,7 @@
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
-using static ParallelParsing.ZRan.NET.Constants;
-using static ParallelParsing.ZRan.NET.LibZ;
 
-namespace ParallelParsing.ZRan.NET;
+namespace ParallelParsing.Interop;
 
 [SuppressUnmanagedCodeSecurity]
 internal static class LibZ

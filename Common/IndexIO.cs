@@ -1,5 +1,4 @@
-
-namespace ParallelParsing.ZRan.NET;
+namespace ParallelParsing.Common;
 
 public static class IndexIO
 {
@@ -22,8 +21,8 @@ public static class IndexIO
 			bw.Write(index[i].Bits);
 			bw.Write(index[i].Window.Length);
 			bw.Write(index[i].Window);
-			bw.Write(index[i].offset.Length);
-			bw.Write(index[i].offset);
+			bw.Write(index[i].offset?.Length ?? 0);
+			bw.Write(index[i].offset ?? Array.Empty<byte>());
 		}
 	}
 

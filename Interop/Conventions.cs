@@ -1,11 +1,10 @@
-using System.IO;
-using System.Globalization;
-using static ParallelParsing.ZRan.NET.LibZ;
-using System.Diagnostics;
+using static ParallelParsing.Interop.LibZ;
+using ParallelParsing.Common;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Buffers;
 
-namespace ParallelParsing.ZRan.NET;
+namespace ParallelParsing.Interop;
 
 public enum ZResult
 {
@@ -31,17 +30,6 @@ public enum ZFlush
 	TREES
 }
 
-public static class Constants
-{
-	public const string ZLIB_VERSION = "1.2.11";
-
-	// sliding window size
-	public const int WINSIZE = 32768;
-
-	// file input buffer size
-	public const int CHUNK = 16384;
-}
-
 public class ZException : Exception
 {
 	public ZResult Code { get; }
@@ -54,7 +42,7 @@ public class ZException : Exception
 
 public unsafe class ZStream : IDisposable
 {
-	internal ZStream() 
+	public ZStream() 
 	{
 		var stream = new z_stream();
 		Ptr = (z_stream*)NativeMemory.Alloc((nuint)sizeof(z_stream));
@@ -126,6 +114,9 @@ public unsafe class ZStream : IDisposable
 			Ptr->next_out = (byte*)_HNextOut.AddrOfPinnedObject();
 		}
 	}
+
+	public void SetNextInPtr(MemoryHandle hnd) => Ptr->next_in = (byte*)hnd.Pointer;
+	public void SetNextOutPtr(MemoryHandle hnd) => Ptr->next_out = (byte*)hnd.Pointer;
 
 	public void Dispose()
 	{

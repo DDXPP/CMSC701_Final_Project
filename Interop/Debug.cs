@@ -1,7 +1,7 @@
 
-namespace ParallelParsing.ZRan.NET;
+namespace ParallelParsing.Interop;
 
-public static class Debug
+internal static class Debug
 {
 	public static void Print(this byte[] arr, int first = int.MaxValue)
 	{

@@ -1,7 +1,6 @@
+using static ParallelParsing.Common.Constants;
 
-using static ParallelParsing.ZRan.NET.Constants;
-
-namespace ParallelParsing.ZRan.NET;
+namespace ParallelParsing.Common;
 
 public sealed class Index
 {

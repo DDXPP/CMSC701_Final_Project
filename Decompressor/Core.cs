@@ -1,18 +1,19 @@
 
-using static ParallelParsing.ZRan.NET.Constants;
-using static ParallelParsing.ZRan.NET.Compat;
-using System.IO.Compression;
-using System.Text;
-using System.Runtime.InteropServices;
+using static ParallelParsing.Common.Constants;
+using static ParallelParsing.Interop.Compat;
+using ParallelParsing.Common;
 using System.Buffers;
+using ParallelParsing.Interop;
+using Index = ParallelParsing.Common.Index;
+using Point = ParallelParsing.Common.Point;
 
-namespace ParallelParsing.ZRan.NET;
+namespace ParallelParsing;
 
 public static class Core
 {
 	public static Index BuildDeflateIndex(FileStream file, uint chunksize)
 	{
-		ZStream strm = new();
+		using var strm = new ZStream();
 		Index index = new Index();
 		byte[] input = new byte[CHUNK];
 		byte[] window = new byte[WINSIZE];
@@ -22,13 +23,8 @@ public static class Core
 		byte[] offsetBeforePoint = new byte[WINSIZE];
 		int offsetArraySize = 0;
 
-		try
-		{
 			ZResult ret;
-			// our own total counters to avoid 4GB limit
 			long totin, totout;
-			// totout value of last access point
-			// long last;
 
 			// automatic gzip decoding
 			ret = InflateInit(strm, 47);
@@ -37,19 +33,12 @@ public static class Core
 				throw new ZException(ret);
 			}
 
-			// inflate the input, maintain a sliding window, and build an index -- this
-			// also validates the integrity of the compressed data using the check
-			// information in the gzip or zlib stream
 			totin = totout = 0;
 			strm.AvailOut = 0;
 			do
 			{
 				// get some compressed data from input file
 				strm.AvailIn = (uint)file.Read(input, 0, (int)CHUNK);
-				// if (ferror(@in) != 0)
-				// {
-				// 	throw new ZException(ZResult.ERRNO);
-				// }
 				if (strm.AvailIn == 0)
 				{
 					throw new ZException(ZResult.DATA_ERROR);
@@ -138,29 +127,12 @@ public static class Core
 				} while (strm.AvailIn != 0);
 			} while (ret != ZResult.STREAM_END);
 
-			// index.length = totout;
 			return index;
-		}
-		finally
-		{
-			// clean up and return index (release unused entries in list)
-			InflateEnd(strm);
-		}
 	}
-
-	// 240k / 1100 = 218
-	// 240k / 300  = 800
-
-	// 218*700 = 152600 = 152k
-	// 240k - 152600 = 93160
-	// 240k - 218*1100 = 5960
-	// 5960/700 = 8.5
 
 	public static unsafe int ExtractDeflateIndex(
 		Memory<byte> fileBuffer, Point from, Point to, Memory<byte> buf)
 	{
-		// lock (o) {
-		// no need to pin (I guess); it's an unmanaged struct on stack
 		using var strm = new ZStream();
 		Memory<byte> input;
 		MemoryHandle hInput = new MemoryHandle();
@@ -170,11 +142,9 @@ public static class Core
 		ZResult ret;
 		int value = 0;
 
-		// proceed only if something reasonable to do
 		if (len < 0)
 			return 0;
 
-		// raw inflate
 		ret = InflateInit(strm, -15);
 		if (ret != ZResult.OK) throw new ZException(ret);
 
@@ -190,7 +160,7 @@ public static class Core
 		strm.AvailIn = 0;
 		strm.AvailOut = (uint)len;
 		hBuf = buf.Pin();
-		strm.Ptr->next_out = (byte*)hBuf.Pointer;
+		strm.SetNextOutPtr(hBuf);
 		do
 		{
 			if (strm.AvailIn == 0)
@@ -202,11 +172,9 @@ public static class Core
 				strm.AvailIn = (uint)value;
 				posInFile += value;
 				if (value == 0) throw new ZException(ZResult.DATA_ERROR);				
-				strm.Ptr->next_in = (byte*)hInput.Pointer;
+				strm.SetNextInPtr(hInput);
 			}
 			ret = Inflate(strm, ZFlush.NO_FLUSH);
-			// strm.NextOut.PrintASCII(32*1024-1);
-			// normal inflate
 			if (ret == ZResult.MEM_ERROR || ret == ZResult.DATA_ERROR || ret == ZResult.NEED_DICT)
 				throw new ZException(ret);
 			if (ret == ZResult.STREAM_ERROR)
@@ -216,13 +184,10 @@ public static class Core
 			}
 			if (ret == ZResult.STREAM_END) break;
 
-			// continue to process the available input before reading more
 		} while (strm.AvailOut != 0);
 
-		// compute the number of uncompressed bytes read after the offset
 		hInput.Dispose();
 		hBuf.Dispose();
 		return len - (int)strm.AvailOut;
 	}
-	// }
 }

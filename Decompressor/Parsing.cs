@@ -5,7 +5,7 @@ using ParallelParsing.Common;
 
 namespace ParallelParsing;
 
-public unsafe static class Parsing
+public static class Parsing
 {
 	static object o = new object();
 	public static IEnumerable<FastqRecord> Parse(CombinedMemory raw)
